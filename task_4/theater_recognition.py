@@ -13,7 +13,6 @@ haar_cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml
 if not os.path.exists(haar_cascade_path):
     raise FileNotFoundError(f"Haar Cascade file not found at {haar_cascade_path}")
 face_cascade = cv2.CascadeClassifier(haar_cascade_path)
-# Path to your dataset
 image_paths = glob('theater_recognition/utkface_aligned_cropped/UTKFace/*.jpg')
 age_labels = []
 
@@ -32,12 +31,11 @@ for path in image_paths:
     except ValueError:
         print(f"Skipping file due to unexpected format: {filename}")
 
-# Print the age distribution
 print("Age distribution:", dict(age_count))
 
 def create_model():
     model = models.Sequential([
-        Input(shape=(48, 48, 3)),  # Define the input shape here
+        Input(shape=(48, 48, 3)),  
         layers.Conv2D(32, (3, 3), activation='relu'),
         layers.MaxPooling2D(pool_size=(2, 2)),
         layers.Conv2D(64, (3, 3), activation='relu'),
@@ -52,7 +50,6 @@ def create_model():
     model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
     return model
 
-# Load and preprocess images
 def preprocess_images(image_paths, target_size=(48, 48)):
     images = []
     for path in image_paths:
@@ -66,10 +63,8 @@ def preprocess_images(image_paths, target_size=(48, 48)):
 images = preprocess_images(image_paths)
 age_labels = np.array(age_labels)
 
-# Split the dataset
 X_train, X_val, y_train, y_val = train_test_split(images, age_labels, test_size=0.2, random_state=42)
 
-# Create or load the model
 model_path = 'age_detection_model.h5'
 if os.path.exists(model_path):
     model = tf.keras.models.load_model(model_path)
@@ -99,13 +94,11 @@ def predict_age(frame):
         face = face.astype('float32') / 255.0  # Normalize
         face = np.expand_dims(face, axis=0)  # Add batch dimension
         
-        # Predict age
         predicted_age = model.predict(face, verbose=0)  # Set verbose=0 to suppress output
         return int(predicted_age[0][0])  # Convert to integer
 
     return None  # No face detected
 
-# Start video capture
 cap = cv2.VideoCapture(0)
 
 data = []
