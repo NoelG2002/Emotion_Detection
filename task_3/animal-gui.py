@@ -12,12 +12,10 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import ModelCheckpoint
 
-# Constants and Configuration
 IMG_SIZE = 128
 CATEGORIES = ["Carnivore", "Herbivore"]
-MODEL_PATH = "animal_detection_model.keras"  # Update the file extension
+MODEL_PATH = "animal_detection_model.keras" 
 
-# Load and Preprocess Dataset
 def load_images(dataset_path):
     data, labels = [], []
     for category in CATEGORIES:
@@ -34,7 +32,6 @@ def load_images(dataset_path):
                     labels.append(label)
     return np.array(data).reshape(-1, IMG_SIZE, IMG_SIZE, 1) / 255.0, to_categorical(labels, 2)
 
-# Load and split data
 data, labels = load_images("animal_recognition/animals")
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
 
@@ -47,7 +44,6 @@ def focal_loss(gamma=2.0, alpha=0.25):
         return K.mean(loss)
     return focal_loss_fixed
 
-# Check if the model exists, and load or create it
 if os.path.exists(MODEL_PATH):
     print("Loading existing model...")
     model = load_model(MODEL_PATH, custom_objects={"focal_loss_fixed": focal_loss()})
@@ -72,20 +68,16 @@ else:
     # Save model checkpoints
     checkpoint = ModelCheckpoint(MODEL_PATH, monitor='val_accuracy', save_best_only=True, verbose=1)
 
-    # Train the model
     model.fit(X_train, y_train, epochs=25, validation_data=(X_test, y_test), class_weight=class_weight, callbacks=[checkpoint])
 
-    # Save the final model
     model.save(MODEL_PATH)
     print(f"Model saved to {MODEL_PATH}")
 
-# Evaluate the model with additional metrics
 y_pred = model.predict(X_test)
 y_test_labels = np.argmax(y_test, axis=1)
 y_pred_labels = np.argmax(y_pred, axis=1)
 print(classification_report(y_test_labels, y_pred_labels, target_names=CATEGORIES))
 
-# GUI for Animal Detection
 class AnimalDetectionGUI:
     def __init__(self, master):
         self.master = master
@@ -149,7 +141,6 @@ class AnimalDetectionGUI:
         self.canvas.create_image(0, 0, anchor="nw", image=tk_img)
         self.canvas.image = tk_img  # Prevent garbage collection
 
-# Run the GUI
 root = tk.Tk()
 app = AnimalDetectionGUI(root)
 root.mainloop()
